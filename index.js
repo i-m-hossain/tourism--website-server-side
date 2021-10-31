@@ -19,6 +19,7 @@ async function run() {
         const database = client.db("Eventdb");
         const eventCollection = database.collection("events");
         const orderCollection = database.collection("orders");
+        const teamCollection = database.collection("team");
         // ------------------------ API endpoints --------------------------//
 
         // create a service
@@ -35,7 +36,7 @@ async function run() {
             res.send(result);
         })
 
-        // de a single service
+        // read a single service
         app.get('/services/:id', async (req, res) => {
             const serviceId = req.params.id;
             const query = { _id: ObjectId(serviceId) }
@@ -62,11 +63,41 @@ async function run() {
             const result = await cursor.toArray()
             res.send(result);
         })
+        // delete order
         app.delete('/orders/:id', async(req, res)=>{
             const orderId = req.params.id;
             const query = { _id: ObjectId(orderId) }
             const result = await orderCollection.deleteOne(query)
             res.json(result);
+        })
+        // update order status
+        app.put('/orders/update/:id', async(req, res)=>{
+            const orderId = req.params.id;
+            const status = req.body.status;
+            console.log(status);
+            const filter = { _id: ObjectId(orderId) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    status: status
+                }
+            };
+            const result = await orderCollection.updateOne(filter, updateDoc, options);
+            res.json(result)
+        })
+
+        // team section
+
+        // create a team member
+        app.post('/members/add', async (req, res) => {
+            const member = req.body;
+            const result = await teamCollection.insertOne(member);
+            res.json(result);
+        })
+        app.get('/members', async(req,res)=>{
+            const cursor = teamCollection.find({})
+            const result = await cursor.toArray()
+            res.send(result);
         })
 
 
