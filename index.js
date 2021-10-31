@@ -18,6 +18,7 @@ async function run() {
         await client.connect();
         const database = client.db("Eventdb");
         const eventCollection = database.collection("events");
+        const orderCollection = database.collection("orders");
         // ------------------------ API endpoints --------------------------//
 
         // create a service
@@ -47,6 +48,24 @@ async function run() {
             const serviceId = req.params.id;
             const query = { _id: ObjectId(serviceId) }
             const result = await eventCollection.deleteOne(query)
+            res.json(result);
+        })
+        // create an order
+        app.post('/order/add', async (req, res) => {
+            const order = req.body;
+            const result = await orderCollection.insertOne(order);
+            res.json(result);
+        })
+        // find an order
+        app.get('/orders', async(req, res)=>{
+            const cursor = orderCollection.find({})
+            const result = await cursor.toArray()
+            res.send(result);
+        })
+        app.delete('/orders/:id', async(req, res)=>{
+            const orderId = req.params.id;
+            const query = { _id: ObjectId(orderId) }
+            const result = await orderCollection.deleteOne(query)
             res.json(result);
         })
 
